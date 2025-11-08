@@ -106,10 +106,10 @@ const AtivosPage = () => {
     }
   };
 
-    const handleUpdateAtivo = async (id) => {
+    const handleUpdateAtivo = async (ativoData) => {
     try {
       
-      const response = await fetch(`${API_BASE_URL}/Ativos/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/Ativos/${ativoData.id_ativo}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -138,6 +138,15 @@ const AtivosPage = () => {
     }
   };
 
+   const handleEditAtivo = (ativo) => {
+    setEditingAtivo(ativo);
+    setShowForm(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingAtivo(null);
+  };
+
 
   const handleDeleteAtivo = async (id) => {
     try {
@@ -156,13 +165,16 @@ const AtivosPage = () => {
     }
   };
 
-  return (
+   return (
     <div className={styles.pageContainer}>
       <div className={styles.header}>
         <h2>Gerenciamento de Ativos</h2>
         <button
           className={styles.addButton}
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            setShowForm(!showForm);
+            setEditingAtivo(null);
+          }}
         >
           {showForm ? 'Cancelar' : 'Novo Ativo'}
         </button>
@@ -177,7 +189,7 @@ const AtivosPage = () => {
         </div>
       )}
 
-      {showForm && (
+      {showForm && !editingAtivo && (
         <AtivoForm
           onSubmit={handleCreateAtivo}
           onCancel={() => setShowForm(false)}
@@ -185,9 +197,20 @@ const AtivosPage = () => {
         />
       )}
 
+      {editingAtivo && (
+        <AtivoForm
+          onSubmit={handleUpdateAtivo}
+          onCancel={handleCancelEdit}
+          localizacoes={localizacoes}
+          ativoData={editingAtivo}
+          isEditing={true}
+        />
+      )}
+
       <AtivosList
         ativos={ativos}
         onDelete={handleDeleteAtivo}
+        onEdit={handleEditAtivo}
         loading={loading}
       />
     </div>

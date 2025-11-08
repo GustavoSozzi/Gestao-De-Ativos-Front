@@ -1,7 +1,13 @@
 import React from "react";
 import styles from "./AtivoForm.module.css";
 
-const AtivoForm = ({ onSubmit, onCancel, localizacoes = [] }) => {
+const AtivoForm = ({
+  onSubmit,
+  onCancel,
+  localizacoes = [],
+  ativosData,
+  isEditing = false,
+}) => {
   const [formData, setFormData] = React.useState({
     nome: "",
     modelo: "",
@@ -9,7 +15,21 @@ const AtivoForm = ({ onSubmit, onCancel, localizacoes = [] }) => {
     codInventario: "",
     tipo: "",
     id_localizacao: "",
+    ...ativosData,
   });
+
+  React.useEffect(() => {
+    if (ativoData) {
+      setFormData({
+        nome: ativoData.nome || "",
+        modelo: ativoData.modelo || "",
+        serialNumber: ativoData.serialNumber || "",
+        codInventario: ativoData.codInventario || "",
+        tipo: ativoData.tipo || "",
+        id_localizacao: ativoData.id_localizacao || "",
+      });
+    }
+  }, [ativoData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,14 +52,14 @@ const AtivoForm = ({ onSubmit, onCancel, localizacoes = [] }) => {
 
     const idLocalizacaoNumber = Number(formData.id_localizacao);
 
-    console.log("id da localizacao aqui: ". idLocalizacaoNumber);
+    console.log("id da localizacao aqui: ", idLocalizacaoNumber);
 
     if (isNaN(idLocalizacaoNumber) || idLocalizacaoNumber <= 0) {
       alert("Selecione uma localização válida!");
       return;
     }
 
-    const ativoData = {
+    const ativoDataToSubmit = {
       nome: formData.nome,
       modelo: formData.modelo,
       serialNumber: formData.serialNumber,
@@ -48,17 +68,23 @@ const AtivoForm = ({ onSubmit, onCancel, localizacoes = [] }) => {
       id_localizacao: idLocalizacaoNumber,
     };
 
-    console.log("Dados enviados:", ativoData);
-    onSubmit(ativoData);
+    if (isEditing && ativoData && ativoData.id_ativo) {
+      ativoDataToSubmit.id_ativo = ativoData.id_ativo;
+    }
 
-    setFormData({
-      nome: "",
-      modelo: "",
-      serialNumber: "",
-      codInventario: "",
-      tipo: "",
-      id_localizacao: "",
-    });
+    console.log("Dados enviados:", ativoDataToSubmit);
+    onSubmit(ativoDataToSubmit);
+
+    if (!isEditing) {
+      setFormData({
+        nome: "",
+        modelo: "",
+        serialNumber: "",
+        codInventario: "",
+        tipo: "",
+        id_localizacao: "",
+      });
+    }
   };
 
   return (
