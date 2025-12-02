@@ -1,8 +1,10 @@
 import React from 'react';
 import { LayoutContext } from '../../../Hooks/LayoutContext';
+import { axiosPrivate } from '../../../src/api/axios';
 import styles from './AtivosPage.module.css';
 import AtivoForm from './AtivoForm';
 import AtivosList from './AtivosList';
+import AtivosFilter from './AtivosFilter';
 
 const AtivosPage = () => {
   const { setPageTitle } = React.useContext(LayoutContext);
@@ -12,49 +14,62 @@ const AtivosPage = () => {
   const [editingAtivo, setEditingAtivo] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
+  const [filters, setFilters] = React.useState({
+    nome: '',
+    modelo: '',
+    tipo: '',
+    codInventario: '',
+    cidade: '',
+    estado: '',
+    matriculaUsuario: '',
+    nomeUsuario: ''
+  });
 
   React.useEffect(() => {
     setPageTitle('Gestão de Ativos');
   }, [setPageTitle]);
 
-  const API_BASE_URL = 'http://localhost:5234/api';
-
   const fetchLocalizacoes = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/Localizacao`);
-      if (response.ok) {
-        const data = await response.json();
+      const response = await axiosPrivate.get('/Localizacao');
+      const data = response.data;
+      
+      const dadosMapeados = (data.localizacoes || []).map(loc => {
+        const idCorreto = loc.id_localizacao || loc.id_Localizacao || loc.Id_Localizacao;
         
-        const dadosMapeados = (data.localizacoes || []).map(loc => {
-          
-          const idCorreto = loc.id_localizacao || loc.id_Localizacao || loc.Id_Localizacao;
-          
-          return {
-            ...loc, 
-            id_localizacao: idCorreto 
-          };
-        });
+        return {
+          ...loc, 
+          id_localizacao: idCorreto 
+        };
+      });
 
-        setLocalizacoes(dadosMapeados);
-
-      }
+      setLocalizacoes(dadosMapeados);
     } catch (err) {
       console.error('Erro ao buscar localizações:', err);
     }
   };
 
-  const fetchAtivos = async () => {
+  const fetchAtivos = async (filterParams = {}) => {
     try {
       setLoading(true);
       console.log('Buscando ativos...');
       
-      const response = await fetch(`${API_BASE_URL}/Ativos`);
+      // Construir query params apenas com valores preenchidos
+      const queryParams = new URLSearchParams();
+      Object.entries(filterParams).forEach(([key, value]) => {
+        if (value !== '' && value !== null && value !== undefined) {
+          queryParams.append(key, value);
+        }
+      });
       
-      if (!response.ok) {
-        throw new Error(`Erro HTTP: ${response.status}`);
-      }
+      const queryString = queryParams.toString();
+      const url = queryString ? `/Ativos?${queryString}` : '/Ativos';
       
-      const data = await response.json();
+      console.log('URL da requisição:', url);
+      
+      const response = await axiosPrivate.get(url);
+      const data = response.data;
+      
       console.log('Dados recebidos:', data);
       
       if (data && Array.isArray(data.ativos)) {
@@ -64,8 +79,7 @@ const AtivosPage = () => {
       }
       
     } catch (err) {
-      console.error('Erro ao buscar ativos:', err);
-      setError(err instanceof Error ? err.message : 'Erro desconhecido ao buscar ativos');
+      setError(err.response?.data?.message || err.message || 'Erro desconhecido ao buscar ativos');
       setAtivos([]);
     } finally {
       setLoading(false);
@@ -77,63 +91,59 @@ const AtivosPage = () => {
     fetchLocalizacoes();
   }, []);
 
+  // Aplicar filtros com debounce
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchAtivos(filters);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [filters]);
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      nome: '',
+      modelo: '',
+      tipo: '',
+      codInventario: '',
+      cidade: '',
+      estado: '',
+      matriculaUsuario: '',
+      nomeUsuario: ''
+    });
+  };
+
   const handleCreateAtivo = async (ativoData) => {
     try {
       console.log('Enviando dados:', ativoData);
       
-      const response = await fetch(`${API_BASE_URL}/Ativos/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(ativoData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Erro ao cadastrar ativo: ${response.status} - ${errorText}`);
-      }
-
-      const responseData = await response.json();
+      await axiosPrivate.post('/Ativos/register', ativoData);
       
-      fetchAtivos();
+      fetchAtivos(filters);
       setShowForm(false);
       setError(null);
       
     } catch (err) {
       console.error('Erro completo ao cadastrar ativo:', err);
-      setError(err instanceof Error ? err.message : 'Erro ao cadastrar ativo');
+      setError(err.response?.data?.message || err.message || 'Erro ao cadastrar ativo');
     }
   };
 
-    const handleUpdateAtivo = async (ativoData) => {
+  const handleUpdateAtivo = async (ativoData) => {
     try {
-      
-      const response = await fetch(`${API_BASE_URL}/Ativos/${ativoData.id_ativo}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(ativoData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Erro ao atualizar ativo: ${response.status} - ${errorText}`);
-      }
+      await axiosPrivate.put(`/Ativos/${ativoData.id_ativo}`, ativoData);
 
       alert("Atualizado com sucesso");
 
-      setAtivos(prev => prev.map(ativo => 
-        ativo.id_ativo === ativoData.id_ativo 
-          ? { ...ativo, ...ativoData }
-          : ativo
-      ));
-      
+      fetchAtivos(filters);
       setEditingAtivo(null);
       setError(null);
     } catch(err) {
-      setError(err instanceof Error ? err.message : 'Erro ao atualizar ativo');
+      setError(err.response?.data?.message || err.message || 'Erro ao atualizar ativo');
       console.error('Erro ao atualizar ativo:', err);
     }
   };
@@ -150,17 +160,12 @@ const AtivosPage = () => {
 
   const handleDeleteAtivo = async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/Ativos/${id}`, {
-        method: 'DELETE',
-      });
+      await axiosPrivate.delete(`/Ativos/${id}`);
 
-
-      if (!response.ok) { throw new Error('Erro ao deletar ativo');}
-
-      setAtivos(prev => prev.filter(ativo => ativo.id_ativo !== id));
+      fetchAtivos(filters);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao deletar ativo');
+      setError(err.response?.data?.message || err.message || 'Erro ao deletar ativo');
       console.error('Erro ao deletar ativo:', err);
     }
   };
@@ -206,6 +211,12 @@ const AtivosPage = () => {
           isEditing={true}
         />
       )}
+
+      <AtivosFilter
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        onClearFilters={handleClearFilters}
+      />
 
       <AtivosList
         ativos={ativos}

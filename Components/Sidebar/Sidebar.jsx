@@ -14,8 +14,6 @@ import {
 const menuItems = [
   { name: 'Ativos', path: '/ativos', icon: <FiHardDrive /> },
   { name: 'Chamados', path: '/chamados', icon: <FiMessageSquare /> },
-  { name: 'Licenças', path: '/licencas', icon: <FiFileText /> },
-  { name: 'Localizações', path: '/localizacoes', icon: <FiMapPin /> },
   { name: 'Usuários', path: '/usuarios', icon: <FiUsers /> }
 ];
 

@@ -11,17 +11,16 @@ import ProtectedRouter from "../Helper/ProtectedRouter";
 import LoginPage from "../Components/Pages/Login/LoginPage";
 import AtivosPage from "../Components/Pages/Ativos/AtivosPage";
 import ChamadosPage from "../Components/Pages/Chamados/ChamadosPage";
+import UsuariosPage from "../Components/Pages/Usuarios/UsuariosPage";
 
 const DashboardPage = () => <div></div>;
 const LicencasPage = () => <h2>Licenças</h2>;
 const LocalizacoesPage = () => <h2>Localizações</h2>;
-const UsuariosPage = () => <h2>Usuários</h2>;
 const NotFoundPage = () => <h2>404 - Página Não Encontrada</h2>;
 
 function App() {
   return (
     <BrowserRouter>
-      <AuthStorage>
         <LayoutStorage>
           <Routes>
             <Route path="/login/*" element={<LoginPage />} />
@@ -29,9 +28,7 @@ function App() {
             <Route
               path="/"
               element={
-                <ProtectedRouter>
                   <Layout />
-                </ProtectedRouter>
               }
             >
               <Route path="/" element={<DashboardPage />} />
@@ -45,7 +42,6 @@ function App() {
             </Route>
           </Routes>
         </LayoutStorage>
-      </AuthStorage>
     </BrowserRouter>
   );
 }

@@ -1,0 +1,131 @@
+.listContainer {
+  margin-top: 20px;
+}
+
+.listTitle {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+}
+
+.tableHeader {
+  background-color: #343a40;
+  color: white;
+}
+
+.tableHeader th {
+  padding: 15px;
+  text-align: left;
+  font-weight: bold;
+}
+
+.tableRow {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.tableRow:hover {
+  background-color: #f8f9fa;
+}
+
+.tableRow td {
+  padding: 15px;
+  vertical-align: middle;
+}
+
+.matricula {
+  font-weight: 600;
+  color: #007bff;
+}
+
+.nome {
+  font-weight: 500;
+}
+
+.roleAdmin {
+  background-color: #ff9800;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.roleTeamMember {
+  background-color: #4caf50;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.licencaButton,
+.editButton,
+.deleteButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.licencaButton:hover {
+  background-color: #fff3e0;
+  transform: scale(1.1);
+}
+
+.editButton:hover {
+  background-color: #e3f2fd;
+  transform: scale(1.1);
+}
+
+.deleteButton:hover {
+  background-color: #ffebee;
+  transform: scale(1.1);
+}
+
+.loading,
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .table {
+    font-size: 0.9rem;
+  }
+  
+  .tableHeader th,
+  .tableRow td {
+    padding: 10px 5px;
+  }
+  
+  .actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

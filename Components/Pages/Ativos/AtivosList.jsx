@@ -25,6 +25,13 @@ const AtivosList = ({ ativos, onDelete, onEdit, loading }) => {
     return "-";
   };
 
+  const getUsuarioFormatado = (ativo) => {
+    if (ativo.usuario) {
+      return `(${ativo.usuario.matricula})`;
+    }
+    return "Não atribuído";
+  };
+
   return (
     <div className={styles.listContainer}>
       <h3 className={styles.listTitle}>Ativos Cadastrados</h3>
@@ -39,6 +46,7 @@ const AtivosList = ({ ativos, onDelete, onEdit, loading }) => {
               <th>Cód. Inventário</th>
               <th>Tipo</th>
               <th>Localização</th>
+              <th>Matricula</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -55,6 +63,7 @@ const AtivosList = ({ ativos, onDelete, onEdit, loading }) => {
                 <td>{ativo.codInventario || "-"}</td>
                 <td>{ativo.tipo || "-"}</td>
                 <td>{getLocalizacaoFormatada(ativo)}</td>
+                <td>{getUsuarioFormatado(ativo)}</td>
                 <td>
                   <div className={styles.actions}>
                     {ativo.id_ativo && (
